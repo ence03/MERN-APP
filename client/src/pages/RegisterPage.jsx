@@ -4,17 +4,45 @@ import {
   Container,
   Heading,
   Input,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import { useAuthStore } from "../store/authStore";
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
+
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
     password: "",
   });
+
+  const toast = useToast();
+  const { register } = useAuthStore();
+
+  const handleRegister = async (newUser) => {
+    const { success, message } = await register(newUser);
+    if (!success) {
+      toast({
+        title: "Error",
+        description: message,
+        status: "error",
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: message,
+        status: "success",
+        isClosable: true,
+      });
+      navigate("/login");
+      setNewUser({ username: "", email: "", password: "" });
+    }
+  };
 
   return (
     <Container maxW={"container.sm"}>
@@ -55,7 +83,11 @@ const RegisterPage = () => {
                 setNewUser({ ...newUser, password: e.target.value })
               }
             />
-            <Button colorScheme="blue" w={"full"}>
+            <Button
+              onClick={() => handleRegister(newUser)}
+              colorScheme="blue"
+              w={"full"}
+            >
               Register
             </Button>
             <Link to="/login">Already have an account?</Link>
